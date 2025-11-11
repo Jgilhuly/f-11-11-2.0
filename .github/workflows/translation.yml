@@ -1,0 +1,102 @@
+name: Auto Translation
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Cursor CLI
+        run: |
+          curl https://cursor.com/install -fsS | bash
+          echo "$HOME/.cursor/bin" >> $GITHUB_PATH
+
+      - name: Configure git identity
+        run: |
+          git config user.name "Cursor Agent"
+          git config user.email "cursoragent@cursor.com"
+
+      - name: Translate Core Pages
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          MODEL: gpt-5
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_PREFIX: translate
+        run: |
+          cursor-agent --force --model "$MODEL" --output-format=text -p << 'EOF'
+          ## Task
+          Automatically maintain translation completeness in the IT Service Desk multi-locale internationalization system.
+
+          ## Current Architecture
+          - **Main Locale File**: `src/lib/locale-strings.ts` - Contains all translations in TypeScript objects
+          - **Language Objects**: `englishStrings` (authoritative) and `spanishStrings` (must match structure)
+          - **Categories**: common, auth, dashboard, tickets, assets, users, navigation, notifications
+          - **Context**: `src/contexts/LocaleContext.tsx` provides `useLocalizedStrings()` hook
+          - **String Access**: Components use `getStrings()` method from the hook
+          - **Storage**: localStorage-based language persistence (no URL routing)
+          - **Supported Locales**: 'en' and 'es' currently supported
+
+          ## Required Actions
+
+          ### 1. **Analyze Translation Completeness**
+          - Read `src/lib/locale-strings.ts`
+          - Compare structure of `englishStrings` vs `spanishStrings` objects
+          - Identify missing keys in `spanishStrings` by comparing against `englishStrings`
+          - Check for structural mismatches (nested objects, missing categories)
+          - Ensure all 8 categories are present and complete
+
+          ### 2. **Add Missing Spanish Translations**
+          For each missing key in `spanishStrings`:
+          - Translate the English value to Spanish
+          - Maintain exact object structure and key names
+          - Preserve interpolation placeholders like `{name}`, `{count}` etc.
+          - Use appropriate technical terminology for IT/software context
+          - Add to the correct category in `spanishStrings` object
+          - Ensure professional, consistent translations
+
+          ### 3. **Ensure Structural Consistency**
+          - Verify `spanishStrings` has identical structure to `englishStrings`
+          - All 8 categories must exist: common, navigation, auth, dashboard, tickets, assets, users, notifications
+          - All nested objects and keys must match exactly
+          - Maintain TypeScript compatibility
+          - No extra or missing keys allowed
+
+          ### 4. **Validation**
+          - Ensure valid TypeScript syntax in `src/lib/locale-strings.ts`
+          - Verify `getStringsForLocale('es')` returns complete Spanish translations
+          - Test that no keys return undefined
+          - Check both objects export correctly
+          - Run `npm run build` to confirm build compatibility
+          - Verify no TypeScript errors
+
+          ## Output Requirements
+          - Log detailed comment on PR with:
+            - Total keys in `englishStrings`
+            - Missing translations found per category
+            - Count of translations added
+            - Any structural issues fixed
+          - Create commit message: "feat(i18n): add missing Spanish translations - [count] keys added"
+          - Commit changes to the current branch
+          - Only modify the `spanishStrings` object
+
+          ## Critical Rules
+          - **Never modify `englishStrings`** - it is the authoritative source
+          - **Only add/update `spanishStrings`** object, never delete existing translations
+          - **Maintain identical structure** - same categories, same key names, same nesting
+          - **Preserve placeholders** - keep `{name}`, `{count}` etc. in translations
+          - **Professional translations** - use formal Spanish appropriate for IT service desk
+          - **No structural changes** - do not reorganize or refactor, only complete translations
+          EOF
