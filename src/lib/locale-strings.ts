@@ -162,7 +162,11 @@ export const englishStrings = {
     searchByTitle: 'Search by title',
     searchByDescription: 'Search by description',
     searchByUser: 'Search by user',
-    clearSearch: 'Clear search'
+    clearSearch: 'Clear search',
+    exportTickets: 'Export Tickets',
+    exportSuccess: 'Tickets exported successfully',
+    exportError: 'Failed to export tickets',
+    noTicketsToExport: 'No tickets to export'
   },
   assets: {
     title: 'Assets',
@@ -418,7 +422,11 @@ export const spanishStrings = {
     searchByTitle: 'Buscar por título',
     searchByDescription: 'Buscar por descripción',
     searchByUser: 'Buscar por usuario',
-    clearSearch: 'Limpiar búsqueda'
+    clearSearch: 'Limpiar búsqueda',
+    exportTickets: 'Exportar Tickets',
+    exportSuccess: 'Tickets exportados exitosamente',
+    exportError: 'Error al exportar tickets',
+    noTicketsToExport: 'No hay tickets para exportar'
   },
   assets: {
     title: 'Activos',

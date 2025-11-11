@@ -24,7 +24,11 @@ interface Ticket {
   assignedUser?: { id: string; name: string; email: string }
 }
 
-export function TicketList() {
+interface TicketListProps {
+  onFilteredTicketsChange?: (tickets: Ticket[]) => void
+}
+
+export function TicketList({ onFilteredTicketsChange }: TicketListProps) {
   const { user } = useAuth()
   const { getStrings } = useLocalizedStrings()
   const strings = getStrings()
@@ -100,6 +104,10 @@ export function TicketList() {
   const handleClearSearch = useCallback(() => {
     setSearchQuery('')
   }, [])
+
+  useEffect(() => {
+    onFilteredTicketsChange?.(filteredTickets)
+  }, [filteredTickets, onFilteredTicketsChange])
 
   if (isLoading) {
     return (
